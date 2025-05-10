@@ -9,10 +9,10 @@ import accelerate
 import peft
 
 
-from huggingface_hub import notebook_login
-from huggingface_hub import login
-login(token=token)
-notebook_login()
+# from huggingface_hub import notebook_login
+# notebook_login()
+# from huggingface_hub import login
+
 
 from transformers import AutoImageProcessor
 from datasets import load_dataset
@@ -203,9 +203,16 @@ if __name__ == "__main__":
     print(f"PEFT version: {peft.__version__}")
 
 
+
     parser = argparse.ArgumentParser(description="LORA fine-tuning of ViT on Food101 dataset")
     parser.add_argument("--username", type=str, required=False, default=None, help="Hugging Face username")
     parser.add_argument("--model_checkpoint", type=str, default="google/vit-base-patch16-224-in21k", help="Model checkpoint to use")
     args = parser.parse_args()
 
+    if args.username is not None:
+        import os
+        # check if HF_TOKEN is set
+        if "HF_TOKEN" not in os.environ:
+            raise ValueError("Please set the HF_TOKEN environment variable with your Hugging Face token.")
+        
     main(args)
