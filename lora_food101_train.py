@@ -41,6 +41,7 @@ import evaluate
 
 
 import torch
+import json
 
 def collate_fn(examples):
     pixel_values = torch.stack([example["pixel_values"] for example in examples])
@@ -74,8 +75,12 @@ def main(args):
     for i, label in enumerate(labels):
         label2id[label] = i
         id2label[i] = label
-
     
+    # Save label mappings to JSON files
+    with open("lora_food101_label2id.json", "w") as f:
+        json.dump(label2id, f)
+    with open("lora_food101_id2label.json", "w") as f:
+        json.dump(id2label, f)
 
     image_processor = AutoImageProcessor.from_pretrained(model_checkpoint)
 
@@ -125,8 +130,6 @@ def main(args):
 
     print_trainable_parameters(model)
 
-    
-
     config = LoraConfig(
         r=16,
         lora_alpha=16,
@@ -135,6 +138,7 @@ def main(args):
         bias="none",
         modules_to_save=["classifier"],
     )
+
     lora_model = get_peft_model(model, config)
 
     print_trainable_parameters(lora_model)
@@ -186,11 +190,13 @@ def main(args):
     print(train_results)
 
 
+
     # Evaluate the model
     trainer.evaluate(val_ds)
 
     if username is not None:
         repo_name = f"{username}/{model_name}-finetuned-lora-food101"
+        # Save label mappings in the PEFT config
         lora_model.push_to_hub(repo_name)
 
 
