@@ -1,0 +1,4 @@
+*.ipynb
+mlruns/
+models/
+__pycache__/
